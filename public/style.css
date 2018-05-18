@@ -1,0 +1,38 @@
+.body {
+    font-family: 'Open Sans', sans-serif;
+}
+.container {
+    margin: 50px auto;
+}
+.loader {
+    border: 16px solid #f3f3f3;
+    border-top: 16px solid #3498db;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    position: absolute;
+    top: 250px;
+    z-index: 999;
+    display: none;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.card {
+    width: 150rem;
+}
+.heart {
+    color: #ff0000;
+}
+.empasize-link {
+    background: #dfdfdf;
+    border-radius: 5px;
+    color: #b2004a;
+    font-family: 'Source Code Pro', monospace;
+    padding: 5px;
+}
+ul > li {
+    margin: 10px 0 10px 0;
+}
