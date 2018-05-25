@@ -36,3 +36,17 @@
 ul > li {
     margin: 10px 0 10px 0;
 }
+
+.scroll {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    width: 100%;
+}
+
+.pad {
+    padding-top: 10px;
+}
+
+#show-posts {
+    display: none;
+}

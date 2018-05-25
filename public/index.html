@@ -31,16 +31,62 @@
                             <input type="text" name="fb-page-url" id="fb-page-url" class="form-control" placeholder="Facebook Page URL" autocomplete="off" required>
                             <p>A Facebook Page URL generally looks like following</p>
                             <ul>
-                                <li><span class="empasize-link">https://www.facebook.com/RandomPage</li>
-                                <li><span class="empasize-link">https://m.facebook.com/random.page</li>
-                                <li><span class="empasize-link">https://www.facebook.com/Random-Page-24353623</li>
+                                <li><span class="empasize-link">https://www.facebook.com/RandomPage</span></li>
+                                <li><span class="empasize-link">https://m.facebook.com/random.page</span></li>
+                                <li><span class="empasize-link">https://www.facebook.com/Random-Page-24353623</span></li>
                             </ul>
                         </div>
                         <div class="form-group">
                             <button type="button" class="btn btn-primary" id="get-all-posts">Get All Posts</button>
-                            <a class="btn btn-success" id="download-csv" style="display: none">Download CSV</a>
                         </div>
                     </form>
+                </div>
+            </div>
+            <div class="pad"></div>
+            <div class="card" id="show-posts">
+                <div class="card-header">
+                    Latest 5 post
+                </div>
+                <div class="card-body scroll">
+                    <!--Table-->
+                    <table class="table table-striped" id="table">
+
+                        <!--Table head-->
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Message</th>
+                            <th>Link</th>
+                            <th>Permalink url</th>
+                            <th>Created time</th>
+                            <th>Type</th>
+                            <th>Id</th>
+                            <th>Comments Data</th>
+                            <th>Comments summary order</th>
+                            <th>Comments summary total count</th>
+                            <th>Comments summary can comment</th>
+                            <th>Likes data</th>
+                            <th>Likes summary total count</th>
+                            <th>Likes summary can like</th>
+                            <th>Likes summary has liked</th>
+                            <th>Reactions data</th>
+                            <th>Reactions summary total count</th>
+                            <th>Reactions summary viewer reaction<th>
+                        </tr>
+                        </thead>
+                        <!--Table head-->
+
+                        <!--Table body-->
+                        <tbody>
+
+                        </tbody>
+                        <!--Table body-->
+
+                    </table>
+                    <!--Table-->
+                </div>
+                <div class="card-footer">
+                    <a class="btn btn-success" id="download-csv" style="display: none;">Download CSV</a>
                 </div>
             </div>
         </div>

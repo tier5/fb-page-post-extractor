@@ -16,12 +16,12 @@ app.get('/posts', (request, response) => {
     const urlParts = url.parse(request.url, true)
     const pageAccessToken = urlParts.query.page_access_token
     const fbPageURL = urlParts.query.fb_page_url
-
     const graphAPIBase = process.env.GRAPH_API_HOST + process.env.GRAPH_API_VERSION
 
     const getAllPostsFromFBPage = (pageId, nextPageURL, posts) => {
         const graphAPIURLForPostsOfAPage = nextPageURL ? nextPageURL : graphAPIBase + '/'+ pageId +'/posts'
         const fields = 'message,link,permalink_url,created_time,type,name,id,comments.limit(0).summary(true),shares,likes.limit(0).summary(true),reactions.limit(0).summary(true)'
+
         const params = nextPageURL ? {} : {
             access_token: pageAccessToken,
             fields: fields,
@@ -68,7 +68,7 @@ app.get('/posts', (request, response) => {
                                 'reactions.summary.viewer_reaction'
                             ]
                         };
-                        converter.json2csv(posts, (err, csv) => {
+                        var csv = converter.json2csv(posts, (err, csv) => {
                             if (err) {
                                 console.log('Error converting JSON to CSV: ', err)
                                 response.status(500).send(err)
@@ -113,5 +113,60 @@ app.get('/posts', (request, response) => {
         })
     }
 })
+app.get('/latest/posts', (request, response) => {
+    const urlParts = url.parse(request.url, true)
+    const pageAccessToken = urlParts.query.page_access_token
+    const fbPageURL = urlParts.query.fb_page_url
+    const graphAPIBase = process.env.GRAPH_API_HOST + process.env.GRAPH_API_VERSION
 
+    const getLatestFBPost = (pageId) => {
+        const graphAPIURLForLatestPostsOfAPage = graphAPIBase + '/'+ pageId +'/posts'
+        const fields = 'message,link,permalink_url,created_time,type,name,id,comments.limit(0).summary(true),shares,likes.limit(0).summary(true),reactions.limit(0).summary(true)'
+        const latestParams = {
+            access_token: pageAccessToken,
+            fields: fields,
+            limit: 5
+        }
+        axios.get(graphAPIURLForLatestPostsOfAPage, {
+            params: latestParams
+        }).then(resLatest => {
+            if (resLatest.data) {
+                response.send(resLatest.data.data)
+            }
+        })
+        .catch(errLatest => {
+            console.log('Posts per page fetching error', errLatest)
+            response.status(500).send(errLatest.message)
+        })
+    }
+
+
+    const fbPageURLSegments = fbPageURL.split('/')
+    const pageSlug = fbPageURLSegments[3] == 'pg' ? fbPageURLSegments[4] : fbPageURLSegments[3]
+    let pageSlugNumber = pageSlug.match(/[\d]*$/g)
+    /** Check if a page slug already has the number id or not,
+     * if has then get the post else get the number id from Graph API
+     */
+    const graphAPIURLForPageNumberID = graphAPIBase + '/' + pageSlug
+    const params = {
+        access_token: pageAccessToken
+    }
+
+    axios.get(graphAPIURLForPageNumberID, {
+        params: params
+    }).then(res => {
+        if (pageSlugNumber[0]) {
+            pageSlugNumber = pageSlugNumber.join("")
+            getLatestFBPost(pageSlugNumber)
+        } else {
+            getLatestFBPost(res.data.id)
+        }
+
+    })
+    .catch(err => {
+        console.log('Page number ID fetching error: ', err)
+        response.status(500).send(err.message)
+    })
+
+})
 app.listen(process.env.APP_PORT, () => console.log(`App is listening on port ${process.env.APP_PORT}`))
