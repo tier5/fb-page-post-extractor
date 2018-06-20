@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+    <script
+        src="javascripts/jquery.js"></script>
+</head>
+<body class="container">
+    <div class="row justify-content-center">
+        <h1>Facebook Page Post Extractor</h1>
+        <h2>Extract Every Post Ever from Your Competitors’ Facebook Pages</h2>
+        <h3>A free tool with <span class="heart">&hearts;</span> by <a href="https://www.facebook.com/king.jon.vaughn" target="_blank">Jon Vaughn</a></h3>
+    </div>
+    <div class="row" id="alert_box">
+        <div class="col-md-12">
+            <p id="message_danger" class="alert alert-danger">Either your email or password is incorrect!</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <form name="loginForm" id="loginForm">
+                <div class="form-group">
+                  <label for="user_email">Email address</label>
+                  <input type="email" 
+                        class="form-control" 
+                        id="user_email" 
+                        aria-describedby="emailHelp"
+                        name="email"
+                        placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                  <label for="user_password">Password</label>
+                  <input type="password" 
+                        class="form-control"
+                        name="password"
+                        id="user_password" 
+                        placeholder="Password"
+                        >
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        $(function(){
+            $("#alert_box").hide();
+            $("#loginForm").submit(function(event) {
+                /* stop form from submitting normally */
+                event.preventDefault();
+
+                var postData = {
+                    email : $("#user_email").val(),
+                    password: $("#user_password").val()
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "/users/login",
+                    data: postData,
+                    contentType: "application/x-www-form-urlencoded",
+                    success: function(responseData, textStatus, jqXHR) {
+                        window.location.href = "/dashboard";
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                        $("#alert_box").show();
+                    }
+                })
+            })
+            
+        })
+    </script>
+</body>
+</html>

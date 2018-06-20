@@ -1,19 +1,19 @@
-const express = require('express')
+var express = require('express');
+var router = express.Router();
 const url = require('url')
 const axios = require('axios')
 const converter = require('json-2-csv')
-require('dotenv').config()
 
-const app = express()
+/* GET home page. */
+router.get('/', function(req, res, next) {
+  res.render('pages/login',{data: {email: '', password: ''}, message : ''});
+});
+router.get('/dashboard', function(req, res, next) {
+  res.render('pages/index');
+});
 
-app.use(express.static('public'))
-
-app.get('/', (request, response) => {
-    response.sendFile(__dirname + '/public/index.html')
-})
-
-app.get('/posts', (request, response) => {
-    const urlParts = url.parse(request.url, true)
+router.get('/posts',(request,response,next) => {
+  const urlParts = url.parse(request.url, true)
     const pageAccessToken = urlParts.query.page_access_token
     const fbPageURL = urlParts.query.fb_page_url
 
@@ -112,6 +112,5 @@ app.get('/posts', (request, response) => {
             response.status(500).send(err.message)
         })
     }
-})
-
-app.listen(process.env.APP_PORT, () => console.log(`App is listening on port ${process.env.APP_PORT}`))
+});
+module.exports = router;
