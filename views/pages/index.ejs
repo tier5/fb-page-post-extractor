@@ -22,13 +22,22 @@
                             <p>Get your access token <a href="https://developers.facebook.com/tools/explorer" target="_blank">here</a></p>
                         </div>
                         <div class="form-group">
-                            <input type="text" name="fb-page-url" id="fb-page-url" class="form-control" placeholder="Facebook Page URL" autocomplete="off" required>
                             <p>A Facebook Page URL generally looks like following</p>
                             <ul>
                                 <li><span class="empasize-link">https://www.facebook.com/RandomPage</li>
                                 <li><span class="empasize-link">https://m.facebook.com/random.page</li>
                                 <li><span class="empasize-link">https://www.facebook.com/Random-Page-24353623</li>
                             </ul>
+                        </div>
+                        <!-- <div class="form-group">
+                            <button class="btn btn-primary" id="add">Add Page</button>
+                        </div> -->
+                        <div class="form-group">
+                            <div><button class="add_field_button btn btn-primary" type="button">Add More Page</button></div></br>
+                            <div class="input_fields_wrap">
+                                <div><input type="text" name="fb-page-url[]" class="form-control fb-page-url" placeholder="Facebook Page URL" autocomplete="off" required></br></div>
+                            </div>
+                            <!-- <input type="text" name="fb-page-url" id="fb-page-url" class="form-control" placeholder="Facebook Page URL" autocomplete="off" required> -->
                         </div>
                         <div class="form-group">
                             <button type="button" class="btn btn-primary" id="get-all-posts">Get All Posts</button>
