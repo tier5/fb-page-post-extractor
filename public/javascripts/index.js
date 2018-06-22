@@ -6,39 +6,34 @@
         var loader = document.querySelector('.loader')
 
         getAllPostsButton.addEventListener('click', function () {
-            
-            loader.style.display = 'block'
-
             if(pageAccessTokenInput.value !== "" && pageAccessTokenInput.value !== null){
                 
                 var values = []
 
                 $('.fb-page-url').each(function () {
-                    if (this.value != '')
-                        values.push(this.value)
-                })
+                    if (this.value != '') {
+                        var params = {
+                            page_access_token: pageAccessTokenInput.value,
+                            fb_page_url: this.value
+                        }
 
-                var params = {
-                    page_access_token: pageAccessTokenInput.value,
-                    fb_page_url: values
-                }
+                        loader.style.display = 'block'
 
-                $.ajax({
-                    type: 'POST',
-                    url: "/posts",
-                    data: params,
-                    success: function(res) {
-                        var csvContent = "data:text/csv;charset=utf-8," + res
-                        var encodedUri = encodeURI(csvContent)
+                        axios.get('/posts', {
+                            params: params
+                        }).then(function (res) {
+                            var csvContent = "data:text/csv;charset=utf-8," + res.data
+                            var encodedUri = encodeURI(csvContent)
 
-                        var downloadLink = document.querySelector('#download-csv')
-                        downloadLink.setAttribute("href", encodedUri)
-                        downloadLink.setAttribute("download", "posts.csv")
-                        downloadLink.style.display = "inline"
-                        downloadLink.style.padding = "10px"
-                        downloadLink.style.border = "1px solid #218838"
+                            var downloadLink = document.querySelector('#download-csv')
+                            downloadLink.setAttribute("href", encodedUri)
+                            downloadLink.setAttribute("download", "posts.csv")
+                            downloadLink.style.display = "inline"
+                            downloadLink.style.padding = "10px"
+                            downloadLink.style.border = "1px solid #218838"
 
-                        loader.style.display = 'none'
+                            loader.style.display = 'none'
+                        })
                     }
                 })
             }
