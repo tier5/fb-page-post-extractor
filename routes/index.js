@@ -2,18 +2,11 @@ var express = require('express');
 var router = express.Router();
 const url = require('url')
 const axios = require('axios')
-const converter = require('json-2-csv')
-/**Facebook Graph Api */
+const converter = require('json-2-csv');
+const jwt = require('jsonwebtoken');
+const {verifyToken} = require('../services/jwt');
+/** Facebook Graph Api */
 const graphAPIBase = process.env.GRAPH_API_HOST + process.env.GRAPH_API_VERSION
-
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('pages/login',{data: {email: '', password: ''}, message : ''});
-});
-
-router.get('/dashboard', function(req, res, next) {
-  res.render('pages/index');
-});
 
 /**
  * Route to get all the posts from graph api
@@ -23,11 +16,11 @@ router.get('/dashboard', function(req, res, next) {
  * @returns {object} response
  */
 
-router.get('/posts',(request,response,next) => {
+router.post('/posts',isAuthenticated,(request,response,next) => {
 
-    const urlParts = url.parse(request.url, true)
-    const pageAccessToken = urlParts.query.page_access_token
-    const fbPageURL = urlParts.query.fb_page_url
+    //const urlParts = url.parse(request.url, true);
+    const pageAccessToken = request.body.page_access_token
+    const fbPageURL = request.body.fb_page_url
     const fbPageURLSegments = fbPageURL.split('/')
     const pageSlug = fbPageURLSegments[3] == 'pg' ? fbPageURLSegments[4] : fbPageURLSegments[3]
     let pageSlugNumber = pageSlug.match(/[\d]*$/g)
@@ -39,9 +32,9 @@ router.get('/posts',(request,response,next) => {
         
         // call function to get a csv output
         getAllPostsFromFBPage(pageSlugNumber, null, [],pageAccessToken).then(csv=>{
-            response.send(csv);
+            response.send({message : 'ok', status : true, csv});
         }).catch(err => {
-            response.status(500).send("Internal server error!");
+            response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
         })
     } else {
         const graphAPIURLForPageNumberID = graphAPIBase + '/' + pageSlug
@@ -54,15 +47,14 @@ router.get('/posts',(request,response,next) => {
         }).then(res => {
             // getting page slug number
             getAllPostsFromFBPage(res.data.id, null, [], pageAccessToken).then(csv=>{
-                response.send(csv);
+                response.send({message : 'ok', status : true, csv});
             }).catch(err =>{
-                console.log(err);
-                response.status(500).send("Internal server error!");
+                response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
             })
         })
         .catch(err => {
             console.log('Page number ID fetching error: ', err)
-            response.status(500).send("Internal server error")
+            response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
         })
     }
 });
@@ -163,5 +155,20 @@ function recursiveGetPosts(pageId, nextPageURL, posts,pageAccessToken, cb) {
         console.log('Posts per page fetching error', err.message)
         cb(err,null);
     })
+}
+
+
+/**
+ * Function to check authentication 
+ */
+function isAuthenticated(req, res, next) {
+    let token = req.body.token || req.headers.token || req.headers.authoriztion;
+    
+    verifyToken(token).then(decoded => {
+        next();
+    }).catch(err => {
+       res.status(401).send({status: false, message : 'Unauthorized'})
+    })
+    next();
 }
 module.exports = router;

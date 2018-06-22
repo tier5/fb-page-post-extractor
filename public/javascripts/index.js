@@ -10,7 +10,7 @@
                 
                 var values = []
 
-                $('.fb-page-url').each(function () {
+                $('.fb-page-url').each(function (index) {
                     if (this.value != '') {
                         var params = {
                             page_access_token: pageAccessTokenInput.value,
@@ -22,16 +22,27 @@
                         axios.get('/posts', {
                             params: params
                         }).then(function (res) {
-                            var csvContent = "data:text/csv;charset=utf-8," + res.data
-                            var encodedUri = encodeURI(csvContent)
-
-                            var downloadLink = document.querySelector('#download-csv')
-                            downloadLink.setAttribute("href", encodedUri)
-                            downloadLink.setAttribute("download", "posts.csv")
-                            downloadLink.style.display = "inline"
-                            downloadLink.style.padding = "10px"
-                            downloadLink.style.border = "1px solid #218838"
-
+                            if (!index){
+                                var csvContent = "data:text/csv;charset=utf-8," + res.data
+                                var encodedUri = encodeURI(csvContent)
+    
+                                var downloadLink = document.querySelector('#download-csv')
+                                downloadLink.setAttribute("href", encodedUri)
+                                downloadLink.setAttribute("download", "posts.csv")
+                                downloadLink.style.display = "inline"
+                                downloadLink.style.padding = "10px"
+                                downloadLink.style.border = "1px solid #218838"   
+                            } else {
+                                var csvContent = "data:text/csv;charset=utf-8," + res.data
+                                var encodedUri = encodeURI(csvContent)
+                                var cus_id = '#download-csv' + (index + 1);
+                                var downloadLink = document.querySelector(cus_id)
+                                downloadLink.setAttribute("href", encodedUri)
+                                downloadLink.setAttribute("download", "posts.csv")
+                                downloadLink.style.display = "inline"
+                                downloadLink.style.padding = "10px"
+                                downloadLink.style.border = "1px solid #218838"   
+                            }
                             $('#download-csv').click();
 
                             loader.style.display = 'none'
@@ -53,11 +64,18 @@ $(document).ready(function() {
         e.preventDefault();
         if(x < max_fields){ //max input box allowed
             x++; //text box increment
-            $(wrapper).append('<div><input type="text" name="fb-page-url[]" class="form-control fb-page-url" placeholder="Facebook Page URL" autocomplete="off" required><a href="#" class="remove_field">Remove</a></br></div>'); //add input box
+            var customElement = '<div class="row"><div class="col-md-6"><input type="text" name="fb-page-url[]" class="form-control fb-page-url" placeholder="Facebook Page URL" autocomplete="off" required></div><div class="col-md-3"><button type="button" class="btn btn-primary remove-row">Remove</button></div><div class="col-md-3"><a class="btn btn-success" id="sadasd" style="display:none">Download CSV</a></div></div><br>'
+            $(wrapper).append(customElement); //add input box
         }
     });
+    $(".remove-row").click(function(e){
+        //e.preventDefault();
+        console.log('ahsdjhasd');
+        $(this).parents('.row')[0].remove();
+        x--;
+    })
+    // $(wrapper).on("click",".remove_field", function(e){ //user click on remove text
+    //     e.preventDefault(); $(this).parent('div').remove(); x--;
+    // });
     
-    $(wrapper).on("click",".remove_field", function(e){ //user click on remove text
-        e.preventDefault(); $(this).parent('div').remove(); x--;
-    });
 });

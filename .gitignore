@@ -4,3 +4,5 @@
 .vscode
 .nbrpojects
 .idea
+./public/frontend/dist
+./public/frontend/node_modules

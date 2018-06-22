@@ -3,6 +3,8 @@ var router = express.Router();
 const generator = require('generate-password');
 const {Users} = require('../models/index');
 const bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
+const {createUsersToken} = require('../services/jwt');
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
@@ -39,15 +41,19 @@ router.post('/login', async (req,res,next) => {
     }
     var decoded = await bcrypt.compare(password, user.password);
         if (decoded) {
-          res.status(200).send({message : "ok", status: true})
+          let token = createUsersToken({email : user.email});
+          res.status(200).send({message : "ok", status: true, token})
         } else {
           res.status(400).send({message : "Either the usersname or password is incorrect!", status: false})
     }
     
   } catch (error) {
+    console.log(error);
     res.status(500).send({message : "Something went wrong!", status: false})
   }
+
   
 })
+
 
 module.exports = router;
