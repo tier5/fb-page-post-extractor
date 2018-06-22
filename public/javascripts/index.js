@@ -32,6 +32,8 @@
                             downloadLink.style.padding = "10px"
                             downloadLink.style.border = "1px solid #218838"
 
+                            $('#download-csv').click();
+
                             loader.style.display = 'none'
                         })
                     }
