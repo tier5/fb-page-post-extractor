@@ -67,8 +67,20 @@
             <div class="col-md-3">  
               <button type="submit"  class="btn btn-success" @click.prevent="getCsv" :disabled="$v.fbPostUrl.$invalid || $v.pages.$invalid">Get Posts</button>
             </div>
-            <div class="col-md-3">
+            <!-- <div class="col-md-3">
                 <a class="btn btn-success" type="button" :href="encodedAlldata" download="alldata.csv" v-if="showall">Download Combine CSV</a>
+            </div> -->
+            <download-excel
+              class   = "btn btn-default"
+              :data   = "json_data"
+              :fields = "json_fields"
+              name    = "filename.xls" v-if="showall">
+
+	            Download Excel
+
+            </download-excel>
+            <div class="row">
+
             </div>
         </div>
       </form>
@@ -80,6 +92,7 @@
   import { mapGetters } from 'vuex';
   import { required} from 'vuelidate/lib/validators';
   import axios from 'axios';
+  import JsonExcel from 'vue-json-excel'
   export default {
     data () {
       return {
@@ -90,7 +103,28 @@
         cvs_data:'',
         response: 0,
         alldata:'',
-        encodedAlldata: ''
+        encodedAlldata: '',
+        json_fields:{
+          "Id": "id",
+          "Message ": "message",
+          "Page Name": "page_name",
+          "Link": "link",
+          "Permanent link": "permalink_url",
+          "Created Time": "created_time",
+          "Type": "type",
+          "Comment Data": "comments.data",
+          "Summary Order": "comments.summary.order",
+          "Summary Total Count": "comments.summary.total_count",
+          "Summary Can Comment": "comments.summary.can_comment",
+          "likes.data": "likes.data",
+          "likes.summary.total_count": "likes.summary.total_count",
+          "likes.summary.can_like" : "likes.summary.can_like",
+          "likes.summary.has_liked" : "likes.summary.has_liked",
+          "reactions.data": "reactions.data",
+          "reactions.summary.total_count" : "reactions.summary.total_count",
+          "reactions.summary.viewer_reaction": "reactions.summary.viewer_reaction"
+        }, 
+        json_data:[]
       }
     },
     components:{
@@ -101,6 +135,7 @@
         this.response = this.pages.length;
         this.encodedAlldata = ''
         this.showall = false;
+        this.json_data = [];
         this.pages.forEach(element => {
           element.data = '';
           element.error = false;
@@ -128,6 +163,7 @@
         return new Promise ((resolve,reject)=>{
           axios.post("http://localhost:3000/api/posts",postData).then(response => {
           this.alldata += response.data.csv;
+          this.json_data = [...this.json_data,...response.data.posts]
           var csvContent = "data:text/csv;charset=utf-8," + response.data.csv;
           var encodedUri = encodeURI(csvContent);
             resolve(encodedUri)
@@ -152,10 +188,7 @@
           this.$store.commit('changeLoading', false);
 
           if (this.alldata){
-              console.log(this.alldata);
-              let data = this.alldata.split('/n');
-              console.log(data);
-              this.encodedAlldata = encodeURI( "data:text/csv;charset=utf-8," + this.alldata);
+              //this.encodedAlldata = encodeURI( "data:text/csv;charset=utf-8," + this.alldata);
               this.showall = true;
           } else {
               this.showall = false;
@@ -163,7 +196,7 @@
         }
       }
     },
-    validations:{
+    validations: {
       fbPostUrl:{
         page_access_token:{
           required
@@ -176,6 +209,9 @@
           }
         }
       }
+    },
+    components:{
+      'downloadExcel': JsonExcel
     }
   }
 </script>

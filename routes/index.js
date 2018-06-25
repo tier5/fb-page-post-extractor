@@ -48,8 +48,8 @@ router.post('/posts',(request,response,next) => {
         pageSlugNumber = pageSlugNumber.join("")
         
         // call function to get a csv output
-        getAllPostsFromFBPage(pageSlugNumber, null, [],pageAccessToken,fbPageURL).then(csv=>{
-            response.send({message : 'ok', status : true, csv});
+        getAllPostsFromFBPage(pageSlugNumber, null, [],pageAccessToken,fbPageURL).then(data=>{
+            response.send({message : 'ok', status : true, csv : data.csv, posts: data.posts});
         }).catch(err => {
             response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
         })
@@ -63,8 +63,8 @@ router.post('/posts',(request,response,next) => {
             params: params
         }).then(res => {
             // getting page slug number
-            getAllPostsFromFBPage(res.data.id, null, [], pageAccessToken,fbPageURL).then(csv=>{
-                response.send({message : 'ok', status : true, csv});
+            getAllPostsFromFBPage(res.data.id, null, [], pageAccessToken,fbPageURL).then(data=>{
+                response.send({message : 'ok', status : true, csv : data.csv, posts: data.posts});
             }).catch(err =>{
                 response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
             })
@@ -131,7 +131,8 @@ function getAllPostsFromFBPage (pageId, nextPageURL, posts, pageAccessToken,fbPa
                         console.log('Error converting JSON to CSV: ', err1)
                         reject(err1);
                     } else {
-                        resolve(csv);
+                        
+                        resolve({csv, posts});
                         console.log('Total posts fetched: ', posts.length);
                     }
                 }, options)
