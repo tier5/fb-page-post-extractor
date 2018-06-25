@@ -8,6 +8,23 @@ const {verifyToken} = require('../services/jwt');
 /** Facebook Graph Api */
 const graphAPIBase = process.env.GRAPH_API_HOST + process.env.GRAPH_API_VERSION
 
+
+
+
+/**
+ * Function to check authentication 
+ */
+function isAuthenticated(req, res, next) {
+    let token = req.body.token || req.headers.token || req.headers.authoriztion;
+    
+    verifyToken(token).then(decoded => {
+        next();
+    }).catch(err => {
+       return res.status(401).send({status: false, message : 'Unauthorized'})
+    })
+    next();
+}
+
 /**
  * Route to get all the posts from graph api
  * @param {object} request
@@ -16,7 +33,7 @@ const graphAPIBase = process.env.GRAPH_API_HOST + process.env.GRAPH_API_VERSION
  * @returns {object} response
  */
 
-router.post('/posts',isAuthenticated,(request,response,next) => {
+router.post('/posts',(request,response,next) => {
 
     //const urlParts = url.parse(request.url, true);
     const pageAccessToken = request.body.page_access_token
@@ -31,7 +48,7 @@ router.post('/posts',isAuthenticated,(request,response,next) => {
         pageSlugNumber = pageSlugNumber.join("")
         
         // call function to get a csv output
-        getAllPostsFromFBPage(pageSlugNumber, null, [],pageAccessToken).then(csv=>{
+        getAllPostsFromFBPage(pageSlugNumber, null, [],pageAccessToken,fbPageURL).then(csv=>{
             response.send({message : 'ok', status : true, csv});
         }).catch(err => {
             response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
@@ -46,7 +63,7 @@ router.post('/posts',isAuthenticated,(request,response,next) => {
             params: params
         }).then(res => {
             // getting page slug number
-            getAllPostsFromFBPage(res.data.id, null, [], pageAccessToken).then(csv=>{
+            getAllPostsFromFBPage(res.data.id, null, [], pageAccessToken,fbPageURL).then(csv=>{
                 response.send({message : 'ok', status : true, csv});
             }).catch(err =>{
                 response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
@@ -68,11 +85,11 @@ router.post('/posts',isAuthenticated,(request,response,next) => {
  * @returns {promise} resolve (csv) reject(error)
  */
 
-function getAllPostsFromFBPage (pageId, nextPageURL, posts, pageAccessToken) {
+function getAllPostsFromFBPage (pageId, nextPageURL, posts, pageAccessToken,fbPageURL) {
     
     return new Promise((resolve,reject)=> {
 
-        recursiveGetPosts(pageId, nextPageURL, posts,pageAccessToken,function(err, posts) {
+        recursiveGetPosts(pageId, nextPageURL, posts,pageAccessToken,fbPageURL,function(err, posts) {
             if (err){
                 reject(err);
             } else {
@@ -108,6 +125,7 @@ function getAllPostsFromFBPage (pageId, nextPageURL, posts, pageAccessToken) {
                     ]
                 };
                 // convert array of object in csv type data
+                // console.log(posts);
                 converter.json2csv(posts, (err1, csv) => {
                     if (err) {
                         console.log('Error converting JSON to CSV: ', err1)
@@ -130,7 +148,7 @@ function getAllPostsFromFBPage (pageId, nextPageURL, posts, pageAccessToken) {
  * @param {function} cb 
  * @returns {function} cb with error or posts
  */
-function recursiveGetPosts(pageId, nextPageURL, posts,pageAccessToken, cb) {
+function recursiveGetPosts(pageId, nextPageURL, posts,pageAccessToken,fbPageURL, cb) {
     const graphAPIURLForPostsOfAPage = nextPageURL ? nextPageURL : graphAPIBase + '/'+ pageId +'/posts'
     const fields = 'message,link,permalink_url,created_time,type,name,id,comments.limit(0).summary(true),shares,likes.limit(0).summary(true),reactions.limit(0).summary(true)'
     const params = nextPageURL ? {} : {
@@ -145,7 +163,7 @@ function recursiveGetPosts(pageId, nextPageURL, posts,pageAccessToken, cb) {
             if (res.data.paging) {
                 if (res.data.paging.next) {
                     //cb(null,posts)
-                    recursiveGetPosts(pageId, decodeURIComponent(res.data.paging.next), posts.concat(res.data.data),pageAccessToken,cb)
+                    recursiveGetPosts(pageId, decodeURIComponent(res.data.paging.next), posts.concat(res.data.data),pageAccessToken,fbPageURL,cb)
                 } else {
                     cb(null,posts)
                 }
@@ -157,18 +175,4 @@ function recursiveGetPosts(pageId, nextPageURL, posts,pageAccessToken, cb) {
     })
 }
 
-
-/**
- * Function to check authentication 
- */
-function isAuthenticated(req, res, next) {
-    let token = req.body.token || req.headers.token || req.headers.authoriztion;
-    
-    verifyToken(token).then(decoded => {
-        next();
-    }).catch(err => {
-       res.status(401).send({status: false, message : 'Unauthorized'})
-    })
-    next();
-}
 module.exports = router;

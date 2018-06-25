@@ -44,28 +44,31 @@
               </ul>          
             </div>
             <br>
-            <div class="row">
-              <div class="col-md-3">
-                <button class="btn btn default" type="button" @click.prevent="addPage">Add More Pages</button>
-              </div>
-            </div>
-            <br>
             <div class="row" v-for="(page,index) in pages" :key="index">
               <div style="margin:5px;">
                 <div class="col-md-6">
-                  <input type="text" class="form-control" placeholder="Facebook Page URL" v-model="fbPostUrl.fb_page_url">
+                  <input type="text" class="form-control" placeholder="Facebook Page URL" v-model="page.fb_page_url">
                 </div>
                 <div class="col-md-1">
-                  <button type="button" @click.prevent="removePage(index)"><i class="fa fa-remove"></i></button>
+                  <button type="button" @click.prevent="removePage(index)" ><i class="fa fa-remove"></i></button>
                 </div>
                 <div class="col-md-2" >
                   <a :href="page.data" class="btn btn-success" v-if="page.data" :download="page.filename">Download CSV</a>
                 </div>
+                <div class="col-md-2" >
+                  <a href="javascript:void(0)" class="btn btn-danger" v-if="page.error">Download Failed</a>
+                </div>
               </div>
             </div>
             <br>
+            <div class="col-md-3">
+                <button class="btn btn default" type="button" @click.prevent="addPage">Add More Pages</button>
+            </div>
             <div class="col-md-3">  
-              <button type="submit"  class="btn btn-success" @click.prevent="getCsv">Get Posts</button>
+              <button type="submit"  class="btn btn-success" @click.prevent="getCsv" :disabled="$v.fbPostUrl.$invalid || $v.pages.$invalid">Get Posts</button>
+            </div>
+            <div class="col-md-3">
+                <a class="btn btn-success" type="button" :href="encodedAlldata" download="alldata.csv" v-if="showall">Download Combine CSV</a>
             </div>
         </div>
       </form>
@@ -80,31 +83,37 @@
   export default {
     data () {
       return {
-        msg: 'Welcome to Your Vue.js App',
+        showall:false,
         fbPostUrl:{
           page_access_token:'',
         },
-        cvs_data:''
+        cvs_data:'',
+        response: 0,
+        alldata:'',
+        encodedAlldata: ''
       }
     },
     components:{
     },
     methods:{
       getCsv(){
-        //this.$store.dispatch("getCvs", this.fbPostUrl);
         this.$store.commit('changeLoading', true);
-        let postBody = this.fbPostUrl;
-        postBody.token = this.token;
-        axios.post("http://localhost:3000/api/posts",this.fbPostUrl).then(response => {
-          var csvContent = "data:text/csv;charset=utf-8," + response.data.csv;
-          var encodedUri = encodeURI(csvContent)
-          this.cvs_data = encodedUri
-          
-          this.$store.commit('changeLoading', false);
-        }).catch(err=>{
-          console.log(err);
-          this.$store.commit('changeLoading', false);
-        })
+        this.response = this.pages.length;
+        this.encodedAlldata = ''
+        this.showall = false;
+        this.pages.forEach(element => {
+          element.data = '';
+          element.error = false;
+          this.$store.commit('changeLoading', true);
+          this.pageCall({page_access_token : this.fbPostUrl.page_access_token , fb_page_url: element.fb_page_url, token: this.token }).then(data=>{
+            element.data = data;  
+            this.response -= 1 
+          }).catch(err=> {
+            this.response -= 1 
+            element.error = true;
+          });
+        });
+        
       },
       logout(){
         this.$store.dispatch('userSignOut');
@@ -114,6 +123,20 @@
       },
       removePage(index){
         this.$store.commit('removePage',index)
+      },
+      pageCall(postData){
+        return new Promise ((resolve,reject)=>{
+          axios.post("http://localhost:3000/api/posts",postData).then(response => {
+          this.alldata += response.data.csv;
+          var csvContent = "data:text/csv;charset=utf-8," + response.data.csv;
+          var encodedUri = encodeURI(csvContent);
+            resolve(encodedUri)
+          }).catch(err => {
+            //console.log(err.response)
+            console.log(err);
+            reject(err)
+          })
+        })
       }
     },
     computed: {
@@ -123,6 +146,37 @@
             'pages'
         ])
     },
+    watch:{
+      response: function(val){
+        if (val === 0){
+          this.$store.commit('changeLoading', false);
+
+          if (this.alldata){
+              console.log(this.alldata);
+              let data = this.alldata.split('/n');
+              console.log(data);
+              this.encodedAlldata = encodeURI( "data:text/csv;charset=utf-8," + this.alldata);
+              this.showall = true;
+          } else {
+              this.showall = false;
+          }
+        }
+      }
+    },
+    validations:{
+      fbPostUrl:{
+        page_access_token:{
+          required
+        }
+      },
+      pages:{
+        $each:{
+          fb_page_url :{
+            required
+          }
+        }
+      }
+    }
   }
 </script>
 
