@@ -22,7 +22,6 @@ function isAuthenticated(req, res, next) {
     }).catch(err => {
        return res.status(401).send({status: false, message : 'Unauthorized'})
     })
-    next();
 }
 
 /**
@@ -33,8 +32,7 @@ function isAuthenticated(req, res, next) {
  * @returns {object} response
  */
 
-router.post('/posts',(request,response,next) => {
-
+router.post('/posts',isAuthenticated,function(request,response,next) {
     //const urlParts = url.parse(request.url, true);
     const pageAccessToken = request.body.page_access_token
     const fbPageURL = request.body.fb_page_url
@@ -49,11 +47,18 @@ router.post('/posts',(request,response,next) => {
         
         // call function to get a csv output
         getAllPostsFromFBPage(pageSlugNumber, null, [],pageAccessToken,fbPageURL).then(data=>{
-            response.send({message : 'ok', status : true, csv : data.csv, posts: data.posts});
+            getPageName(pageSlugNumber, pageAccessToken).then(pagename=>{
+                response.send({message : 'ok', status : true, csv : data.csv, posts: data.posts});
+            }).catch(err=>{
+                response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
+            })
+            
+            
         }).catch(err => {
             response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
         })
     } else {
+        
         const graphAPIURLForPageNumberID = graphAPIBase + '/' + pageSlug
         const params = {
             access_token: pageAccessToken
@@ -64,7 +69,18 @@ router.post('/posts',(request,response,next) => {
         }).then(res => {
             // getting page slug number
             getAllPostsFromFBPage(res.data.id, null, [], pageAccessToken,fbPageURL).then(data=>{
-                response.send({message : 'ok', status : true, csv : data.csv, posts: data.posts});
+                getPageName(res.data.id, pageAccessToken).then(pagename => {
+                    let posts = data.posts ;
+                    let resPosts = posts.map(elem=>{
+                        
+                            elem.page_name = pagename.name
+                            elem.shares_count = elem.shares ? elem.shares.count : 0
+                            return elem
+                        })
+                    response.send({message : 'ok', status : true, csv : data.csv, posts: resPosts});
+                }).catch(err=>{
+                    response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
+                })  
             }).catch(err =>{
                 response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
             })
@@ -121,7 +137,8 @@ function getAllPostsFromFBPage (pageId, nextPageURL, posts, pageAccessToken,fbPa
                         'likes.summary.has_liked',
                         'reactions.data',
                         'reactions.summary.total_count',
-                        'reactions.summary.viewer_reaction'
+                        'reactions.summary.viewer_reaction',
+                        'shares.count'
                     ]
                 };
                 // convert array of object in csv type data
@@ -150,8 +167,9 @@ function getAllPostsFromFBPage (pageId, nextPageURL, posts, pageAccessToken,fbPa
  * @returns {function} cb with error or posts
  */
 function recursiveGetPosts(pageId, nextPageURL, posts,pageAccessToken,fbPageURL, cb) {
+
     const graphAPIURLForPostsOfAPage = nextPageURL ? nextPageURL : graphAPIBase + '/'+ pageId +'/posts'
-    const fields = 'message,link,permalink_url,created_time,type,name,id,comments.limit(0).summary(true),shares,likes.limit(0).summary(true),reactions.limit(0).summary(true)'
+    const fields = 'message,link,label,permalink_url,created_time,type,name,id,comments.limit(0).summary(true),shares.limit(0).summary(true),likes.limit(0).summary(true),reactions.limit(0).summary(true)'
     const params = nextPageURL ? {} : {
         access_token: pageAccessToken,
         fields: fields,
@@ -175,5 +193,31 @@ function recursiveGetPosts(pageId, nextPageURL, posts,pageAccessToken,fbPageURL,
         cb(err,null);
     })
 }
+
+/**
+ * Functiion to get page name from graph api
+ */
+ function getPageName(pageId,pageAccessToken) {
+
+    let graphAPIURL = graphAPIBase + "/" + pageId
+    let params = {
+        fields : "name",
+        access_token:pageAccessToken 
+    }
+    return new Promise((resolve,reject)=>{
+        axios.get(graphAPIURL, {
+            params: params
+        }).then(res => {
+            if (res.data) {
+                resolve(res.data)
+               //console.log(res.data); 
+            }
+        }).catch(err => {
+            //console.log('Posts per page fetching error', err.message)
+            reject(err);
+        })
+    })
+ }
+
 
 module.exports = router;

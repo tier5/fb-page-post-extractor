@@ -53,7 +53,16 @@
                   <button type="button" @click.prevent="removePage(index)" ><i class="fa fa-remove"></i></button>
                 </div>
                 <div class="col-md-2" >
-                  <a :href="page.data" class="btn btn-success" v-if="page.data" :download="page.filename">Download CSV</a>
+                  <!-- <a :href="page.data" class="btn btn-success" v-if="page.data" :download="page.filename">Download CSV</a> -->
+                  <download-excel
+                    class   = "btn btn-success"
+                    :data   = "page.data"
+                    :fields = "json_fields"
+                      name    = "page.xls" v-if="page.data">
+
+	                  Download Excel
+
+                  </download-excel>
                 </div>
                 <div class="col-md-2" >
                   <a href="javascript:void(0)" class="btn btn-danger" v-if="page.error">Download Failed</a>
@@ -71,10 +80,10 @@
                 <a class="btn btn-success" type="button" :href="encodedAlldata" download="alldata.csv" v-if="showall">Download Combine CSV</a>
             </div> -->
             <download-excel
-              class   = "btn btn-default"
+              class   = "btn btn-success"
               :data   = "json_data"
               :fields = "json_fields"
-              name    = "filename.xls" v-if="showall">
+              name    = "allpagedata.xls" v-if="showall">
 
 	            Download Excel
 
@@ -105,24 +114,16 @@
         alldata:'',
         encodedAlldata: '',
         json_fields:{
-          "Id": "id",
+          "Page": "page_name",
           "Message ": "message",
-          "Page Name": "page_name",
           "Link": "link",
-          "Permanent link": "permalink_url",
+          "Permanent Url": "permalink_url",
           "Created Time": "created_time",
           "Type": "type",
-          "Comment Data": "comments.data",
-          "Summary Order": "comments.summary.order",
-          "Summary Total Count": "comments.summary.total_count",
-          "Summary Can Comment": "comments.summary.can_comment",
-          "likes.data": "likes.data",
-          "likes.summary.total_count": "likes.summary.total_count",
-          "likes.summary.can_like" : "likes.summary.can_like",
-          "likes.summary.has_liked" : "likes.summary.has_liked",
-          "reactions.data": "reactions.data",
-          "reactions.summary.total_count" : "reactions.summary.total_count",
-          "reactions.summary.viewer_reaction": "reactions.summary.viewer_reaction"
+          "Id": "id",
+          "Comments Total Count": "comments.summary.total_count",
+          "Reaction Total Count" : "reactions.summary.total_count",
+          "Shares Total Count": "shares_count",
         }, 
         json_data:[]
       }
@@ -144,8 +145,16 @@
             element.data = data;  
             this.response -= 1 
           }).catch(err=> {
+
             this.response -= 1 
             element.error = true;
+            if (err.response){
+              console.log(err.response);
+              if (err.response.status && err.response.status === 401){
+                this.$store.commit('changeLoading', false);
+                this.logout();
+              }
+            }
           });
         });
         
@@ -162,11 +171,11 @@
       pageCall(postData){
         return new Promise ((resolve,reject)=>{
           axios.post("http://localhost:3000/api/posts",postData).then(response => {
-          this.alldata += response.data.csv;
+          // this.alldata += response.data.csv;
           this.json_data = [...this.json_data,...response.data.posts]
-          var csvContent = "data:text/csv;charset=utf-8," + response.data.csv;
-          var encodedUri = encodeURI(csvContent);
-            resolve(encodedUri)
+          // var csvContent = "data:text/csv;charset=utf-8," + response.data.csv;
+          // var encodedUri = encodeURI(csvContent);
+            resolve(response.data.posts)
           }).catch(err => {
             //console.log(err.response)
             console.log(err);
@@ -187,7 +196,7 @@
         if (val === 0){
           this.$store.commit('changeLoading', false);
 
-          if (this.alldata){
+          if (this.json_data.length){
               //this.encodedAlldata = encodeURI( "data:text/csv;charset=utf-8," + this.alldata);
               this.showall = true;
           } else {
