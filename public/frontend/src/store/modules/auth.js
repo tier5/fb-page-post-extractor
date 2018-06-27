@@ -73,15 +73,21 @@ const actions = {
             commit('userSignIn',res.body);
             router.push('/dashboard');
           } else {
-
+            commit('changeLoading',false);
           }
         },
         (err) => {
           commit('changeLoading',false);
           var message = err.body.message;
-          console.log(message);
-          commit('errorMessage',message);
-          commit('errorTrue');
+          swal({
+            position: 'center',
+            type: 'error',
+            title: message,
+            showConfirmButton: false,
+            timer: 3000
+          })
+          // commit('errorMessage',message);
+          // commit('errorTrue');
         }
       )
   },
@@ -144,8 +150,8 @@ const actions = {
         (err) => {
           commit('changeLoading',false);
           var message = err.body.message; 
-          commit('errorMessage',message);
-          commit('errorTrue');
+          // commit('errorMessage',message);
+          // commit('errorTrue');
         }
       )
   },

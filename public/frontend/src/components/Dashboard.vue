@@ -23,7 +23,7 @@
     <div class="row justify-content-center" style="text-align: center;">
       <h1>Facebook Page Post Extractor</h1>
       <h2>Extract Every Post Ever from Your Competitors’ Facebook Pages</h2>
-      <h3>A free tool with <span class="heart">&hearts;</span> by <a href="https://www.facebook.com/king.jon.vaughn" target="_blank">Jon Vaughn</a></h3>
+      <h3>A free tool with <span class="heart">&hearts;</span> by <a href="https://www.facebook.com/king.jon.vaughn" target="_blank">Jon Vaughn</a> and <a href="https://www.facebook.com/EliasYD" target="_blank">Elias Benjelloun</a></h3>
     </div>
     <div class="row">
       <form>
@@ -149,7 +149,6 @@
             this.response -= 1 
             element.error = true;
             if (err.response){
-              console.log(err.response);
               if (err.response.status && err.response.status === 401){
                 this.$store.commit('changeLoading', false);
                 this.logout();
