@@ -170,7 +170,7 @@
       },
       pageCall(postData){
         return new Promise ((resolve,reject)=>{
-          axios.post("http://localhost:3000/api/posts",postData).then(response => {
+          axios.post("/api/posts",postData).then(response => {
           // this.alldata += response.data.csv;
           this.json_data = [...this.json_data,...response.data.posts]
           // var csvContent = "data:text/csv;charset=utf-8," + response.data.csv;
