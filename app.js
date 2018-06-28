@@ -10,8 +10,7 @@ require('./configs/connection');
 require('./models/index');
 
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const apiRouter = require('./routes/index');
 
 const app = express();
 
@@ -29,8 +28,7 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Headers","*")
   next();
 })
-app.use('/api', indexRouter);
-app.use('/api/users', usersRouter);
+app.use('/api', apiRouter);
 
 // send all get request to frontend to handle  
 app.get('*',function(req,res){
