@@ -7,6 +7,8 @@ const { deleteUserFromHook,
 const {getPagePosts}                = require('../controllers/pageController');
 const {verifyToken}                 = require('../services/jwt');
 
+const passportFacebook              = require('../socialAuth/facebookLogin');
+
 
 
 router.post("/users/login", login);
@@ -20,6 +22,17 @@ router.post("/users/suspend",suspendUserFromHook);
 router.post("/users/unsuspend",unsuspendUserFromHook);
 
 router.post('/posts',isAuthenticated,getPagePosts);
+
+router.get('/auth/facebook', passportFacebook.authenticate('facebook',{ scope: ['manage_pages', 'pages_show_list', 'publish_pages','email']}));
+router.get('/auth/facebook/callback',
+    passportFacebook.authenticate('facebook', { failureRedirect: '/' }),
+    function(req, res) {
+        // Successful authentication, redirect home.
+        var fullUrl = req.protocol + '://' + req.get('host');
+        //var token = jwt.sign({id:user.provider_id,email:user.email}, "test",{ algorithm: 'HS256', expiresIn: 60*60*24 });
+        res.redirect(fullUrl + '/dashboard?token=true');
+        //res.status(200).send({message : 'success', status : true});
+    });
 
 /**
  * Function to check authentication 

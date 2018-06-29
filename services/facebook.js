@@ -130,12 +130,25 @@ function recursiveGetPosts(pageId, nextPageURL, posts,pageAccessToken,fbPageURL,
             }
         }
     }).catch(err => {
+        console.log(err);
         console.log('Posts per page fetching error', err.message)
         cb(err,null);
     })
+};
+
+function getUsersLongLiveAccesstoken(accessToken){
+    let params = {
+        grant_type : "fb_exchange_token",
+        client_id: process.env.facebook_clientID,
+        client_secret: process.env.facebook_clientSecret,
+        fb_exchange_token: accessToken
+    }
+    let url = graphAPIBase + "/oauth/access_token"
+    return axios.get(url, {params : params})
 }
 
 module.exports = {
     getAllPostsFromFBPage,
-    getPageName
+    getPageName,
+    getUsersLongLiveAccesstoken
 }

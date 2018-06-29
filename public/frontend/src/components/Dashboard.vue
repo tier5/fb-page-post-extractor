@@ -89,7 +89,9 @@
 
             </download-excel>
             <div class="row">
-
+              <div class="col-md-3">
+                <a  class="btn btn-primary" href="/api/auth/facebook">Facebook Login</a>
+              </div>
             </div>
         </div>
       </form>
@@ -157,6 +159,13 @@
           });
         });
         
+      },
+      facebookLogin(){
+        // axios.get("http://localhost:3000/api/auth/facebook").then(res=>{
+        //   console.log(res);
+        // }).catch(err=>{
+        //   console.log(err)
+        // })
       },
       logout(){
         this.$store.dispatch('userSignOut');
