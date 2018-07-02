@@ -67,6 +67,13 @@
                 <div class="col-md-2" >
                   <a href="javascript:void(0)" class="btn btn-danger" v-if="page.error">Download Failed</a>
                 </div>
+                <div class="col-md-1" >
+                  <a href="javascript:void(0)">
+                    <router-link to="/view">
+                      <i class="fa fa-eye fa-2x" aria-hidden="true" ></i>
+                    </router-link>
+                  </a>
+                </div>
               </div>
             </div>
             <br>

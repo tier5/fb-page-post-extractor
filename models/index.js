@@ -3,6 +3,8 @@
 */
 
 const Users = require('./users');
+const Pages = require('./pages');
 module.exports = {
-    Users
+    Users,
+    Pages
 } 

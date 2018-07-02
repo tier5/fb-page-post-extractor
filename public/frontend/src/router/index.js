@@ -2,7 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 import Dashboard from '../components/Dashboard'
-import Login from '../components/Login.vue'
+import Login from '../components/Login.vue';
+import Statistics from '../components/Statistics.vue'
 import AuthGaurd from './gaurds/auth-gaurd';
 import NotAuthGaurd from './gaurds/not-auth-gaurd';
 
@@ -22,6 +23,12 @@ export default new Router({
       name: 'Login',
       beforeEnter:NotAuthGaurd,
       component: Login
+    },
+    {
+      path: '/view',
+      name: 'stats',
+      beforeEnter:AuthGaurd,
+      component: Statistics
     },
     { path: '*', redirect: '/dashboard' }
     

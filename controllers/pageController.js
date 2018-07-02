@@ -6,7 +6,7 @@ const axios = require('axios')
 const graphAPIBase = process.env.GRAPH_API_HOST + process.env.GRAPH_API_VERSION
 const {verifyToken} = require('../services/jwt');
 const {getAllPostsFromFBPage , getPageName}  = require('../services/facebook');
-
+const {Pages} = require('../models/index');
 
 
  function getPagePosts(request,response,next){
@@ -24,8 +24,18 @@ const {getAllPostsFromFBPage , getPageName}  = require('../services/facebook');
         
         // call function to get a csv output
         getAllPostsFromFBPage(pageSlugNumber, null, [],pageAccessToken,fbPageURL).then(data=>{
-            getPageName(pageSlugNumber, pageAccessToken).then(pagename=>{
-                response.send({message : 'ok', status : true, csv : data.csv, posts: data.posts});
+            getPageName(pageSlugNumber, pageAccessToken).then(pagename => {
+                Pages.create({
+                    user : request.user._id,
+                    pageUrl : fbPageURL,
+                    pageId: pageSlugNumber,
+                    posts : data.posts
+                }).then( created=>{
+                    return response.send({message : 'ok', status : true, csv : data.csv, posts: data.posts});
+                }).catch(err=>{
+                    return response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
+                })
+                
             }).catch(err=>{
                 response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
             })
@@ -54,7 +64,16 @@ const {getAllPostsFromFBPage , getPageName}  = require('../services/facebook');
                             elem.shares_count = elem.shares ? elem.shares.count : 0
                             return elem
                         })
-                    response.send({message : 'ok', status : true, csv : data.csv, posts: resPosts});
+                        Pages.create({
+                            user : request.user._id,
+                            pageUrl : fbPageURL,
+                            pageId: res.data.id,
+                            posts : posts
+                        }).then( created=>{
+                            return response.send({message : 'ok', status : true, csv : data.csv, posts: resPosts});
+                        }).catch(err=>{
+                            return response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
+                        })
                 }).catch(err=>{
                     response.status(500).send({message : 'Something went wrong!', status : false, error : err.message})
                 })  

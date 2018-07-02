@@ -6,6 +6,7 @@ const { deleteUserFromHook,
         createUserFromHook}         = require('../controllers/hooksController');
 const {getPagePosts}                = require('../controllers/pageController');
 const {verifyToken}                 = require('../services/jwt');
+const {Users}                       = require('../models/index');
 
 
 
@@ -28,8 +29,16 @@ function isAuthenticated(req, res, next) {
     let token = req.body.token || req.headers.token || req.headers.authoriztion;
     
     verifyToken(token).then(decoded => {
-        next();
+        Users.findOne({email : decoded.email}).then(user => {
+            req.user = user ;
+            next();
+        }).catch(err=>{
+            console.log(err)
+            return res.status(500).send({status: false, message : 'error'})
+        })
+
     }).catch(err => {
+        console.log(err);
        return res.status(401).send({status: false, message : 'Unauthorized'})
     })
 }
