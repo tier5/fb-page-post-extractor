@@ -4,7 +4,7 @@
  * 
  */
 
- const bcrypt = require('bcrypt');
+ //const bcrypt = require('bcrypt');
  const {createUsersToken} = require('../services/jwt');
  const {Users}= require('../models/index');
 
