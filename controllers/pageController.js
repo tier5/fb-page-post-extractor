@@ -101,11 +101,76 @@ const {Pages} = require('../models/index');
     }
  }
 
- function getPageStats(req,res,next){
+ function getPageStatsOverall(req,res,next){
     let pageurl = req.query.pageurl;
     let year = req.query.year; // undefind , null , year , blank
     if (!pageurl){
         return res.status(400).send({message : 'Bad Request', status: false})
+    }
+    if (year){
+        /** 
+         * This query will work if the count is of type number/integer 
+         * for that if your using cvs for data insert ,then before insert change the datatype to number 
+         */
+        Pages.aggregate([
+            {
+                $match: {
+                    pageUrl : pageurl
+                }
+            },
+            {
+                $project:{
+                    "posts": 1,
+                    "_id": 0
+                }
+            },
+            {
+                $unwind : "$posts",
+            },
+            {
+                $project : {
+                    comments : "$posts.comments.summary.total_count",
+                    likes : "$posts.likes.summary.total_count",
+                    reactions :"$posts.reactions.summary.total_count",
+                    year : "$posts.year"
+                }
+            },
+            {
+                $group : {
+                    _id : {  year : "$year" },
+                    total_comments: {
+                        $sum : "$comments"
+                    },
+                    total_likes: {
+                        $sum : "$likes"
+                    },
+                    total_reactions: {
+                        $sum : "$reactions"
+                    }
+                }
+            },
+            {
+                $project : {
+                    _id : 0,
+                    year : "$_id.year",
+                    total_comments: 1,
+                    total_likes: 1,
+                    total_reactions: 1,
+                    total_engagement: {
+                        $sum : ["$total_comments", "$total_likes", "$total_reactions"]
+                    }
+
+                }
+            }
+        ]).then(docs=>{
+            if (!docs) {
+                return res.status(400).send({message : 'Bad Request', status : false})
+            }
+            return res.status(200).send({message : "ok", status : true, data : docs})
+        }).catch(err=>{
+            res.send(err)
+            return res.status(500).send({ message : 'Something went wrong!', status : false})
+        })
     }
     Pages.aggregate([
         {
@@ -115,6 +180,7 @@ const {Pages} = require('../models/index');
         },
         {
             $project : {
+                "posts": {$count : "$posts"},
                 "comments" : {$sum : "$posts.comments.summary.total_count"},
                 "shares": {$sum : "$posts.shares.count"},
                 "likes": {$sum : "$posts.likes.summary.total_count"},
@@ -136,5 +202,5 @@ const {Pages} = require('../models/index');
  }
  module.exports = {
     getPagePosts,
-    getPageStats
+    getPageStatsOverall,
  }
