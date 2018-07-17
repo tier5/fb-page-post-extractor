@@ -5,10 +5,11 @@
   "main": "app.js",
   "dependencies": {
     "axios": "^0.18.0",
-    "bcrypt": "*",
+    "bcrypt": ">= 0.5.x",
     "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.4",
+    "csvtojson": "^2.0.4",
     "debug": "~2.6.9",
     "dotenv": "^6.0.0",
     "ejs": "~2.5.7",
@@ -17,12 +18,14 @@
     "http-errors": "~1.6.2",
     "json-2-csv": "^2.2.0",
     "jsonwebtoken": "^8.3.0",
+    "moment": "^2.22.2",
     "mongoose": "^5.1.6",
     "morgan": "~1.9.0",
     "passport": "^0.4.0",
     "passport-facebook": "^2.1.1",
     "url": "^0.11.0",
-    "validator": "^10.4.0"
+    "validator": "^10.4.0",
+    "xls-to-json": "^0.5.0"
   },
   "devDependencies": {
     "nodemon": "^1.17.5"

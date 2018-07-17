@@ -1,24 +1,34 @@
+
 <template>
   <div>
-    <div class="row">
-        <div class="col-md-12">
-            Statistics 
-        </div>
-    </div>
+    <section class="charts">
+      <vue-highcharts :options="columnOptions" ref="barCharts"></vue-highcharts>
+    </section>
+
+    <section class="charts">
+      <vue-highcharts :options="pieOptions" ref="pieCharts"></vue-highcharts>
+    </section>
+
+    <section class="charts">
+      <vue-highcharts :options="pieOptions" ref="pieCharts"></vue-highcharts>
+    </section>
   </div>
 </template>
-
 <script>
+
+import VueHighcharts from '../../src/VueHighcharts.vue'
+import Highcharts from 'highcharts'
+import * as data from '../../src/data/data'
+
 export default {
-  data () {
+  components: {
+    VueHighcharts,
+  },
+  data() {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      columnOptions: data.ColumnData,
+      pieOptions: data.PieData,
     }
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-
-</style>
