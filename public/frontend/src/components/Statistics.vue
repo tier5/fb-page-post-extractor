@@ -1,17 +1,46 @@
 
 <template>
-  <div>
-    <section class="charts">
-      <vue-highcharts :options="columnOptions" ref="barCharts"></vue-highcharts>
-    </section>
+  <div style="margin:40px;">
 
-    <section class="charts">
-      <vue-highcharts :options="pieOptions" ref="pieCharts"></vue-highcharts>
-    </section>
-
-    <section class="charts">
-      <vue-highcharts :options="pieOptions" ref="pieCharts"></vue-highcharts>
-    </section>
+    <div class="row">
+      <div class="col-md-3">
+        <ul>
+          <li>
+            #POSTS 
+          </li>
+          <li>
+            #Total Engagement
+          </li>
+          <li>
+            #Reactions
+          </li>
+          <li>
+            #Comments
+          </li>
+          <li>
+            #Shares
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-8">
+        <section class="charts">
+          <vue-highcharts :options="columnOptions" ref="barCharts"></vue-highcharts>
+        </section>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6"></div>
+      <div class="col-md-3">
+        <section class="charts">
+          <vue-highcharts :options="pieOptions" ref="pieCharts"></vue-highcharts>
+        </section>
+      </div>
+      <div class="col-md-3">
+        <section class="charts">
+          <vue-highcharts :options="pieOptions" ref="pieCharts"></vue-highcharts>
+        </section>
+      </div>
+    </div>
   </div>
 </template>
 <script>
