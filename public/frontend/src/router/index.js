@@ -30,7 +30,7 @@ export default new Router({
       beforeEnter:AuthGaurd,
       component: Statistics
     },
-    { path: '*', redirect: '/dashboard' }
+    { path: '*', redirect: '/view' }
     
   ]
 })

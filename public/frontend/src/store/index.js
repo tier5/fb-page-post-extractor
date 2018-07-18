@@ -2,7 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Auth from './modules/auth';;
 import Loader from './modules/loader';
-import Posts from './modules/posts'
+import Posts from './modules/posts';
+import Statistics from './modules/statistics';
 
 Vue.use(Vuex)
 
@@ -14,6 +15,7 @@ export default new Vuex.Store({
   modules: {
     Auth,
     Loader,
-    Posts
+    Posts,
+    Statistics
   }
 })

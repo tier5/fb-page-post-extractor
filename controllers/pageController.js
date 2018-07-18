@@ -102,8 +102,9 @@ const {Pages} = require('../models/index');
  }
 
  function getPageStatsOverall(req,res,next){
-    let pageurl = req.query.pageurl;
-    let year = req.query.year; // undefind , null , year , blank
+    let pageurl = req.query.pageurl || 'testingdata21';
+    console.log(req.query)
+    let year = req.query.year || false; // undefind , null , year , blank 
     if (!pageurl){
         return res.status(400).send({message : 'Bad Request', status: false})
     }
@@ -171,33 +172,60 @@ const {Pages} = require('../models/index');
             res.send(err)
             return res.status(500).send({ message : 'Something went wrong!', status : false})
         })
+    } else {
+        Pages.aggregate([
+            {
+                $match: {
+                    pageUrl : pageurl
+                }
+            },
+            {
+                $project : {
+                    "posts": {$size : "$posts"},
+                    "comments" : "$posts.comments.summary.total_count",
+                    "reactions": "$posts.reactions.summary.total_count",
+                    "likes": "$posts.likes.summary.total_count"
+                }
+            }
+    
+        ]).then(docs=>{
+            if (!docs) {
+                
+                return res.status(400).send({message : 'Bad Request', status : false})
+            }
+            docs[0].comments = docs[0].comments.filter(cm =>{
+                if (cm !== 'null'){ return cm}
+            }).reduce((sum,val)=>sum+val)
+            docs[0].reactions = docs[0].reactions.filter(cm =>{
+                if (cm !== 'null'){ return cm}
+            }).reduce((sum,val)=>sum+val)
+            docs[0].likes = docs[0].likes.filter(cm =>{
+                if (cm !== 'null'){ return cm}
+            }).reduce((sum,val)=>sum+val)
+            return res.status(200).send({data : docs[0], status : true, message :'ok'})
+        }).catch(err=>{
+            console.log(err);
+            return res.status(500).send({ message : 'Something went wrong!', status : false})
+        })
     }
-    Pages.aggregate([
-        {
+    /**
+     * if data in db are stored from facebook
+     * {
             $match: {
                 pageUrl : pageurl
             }
         },
         {
             $project : {
-                "posts": {$count : "$posts"},
+                "posts": {$size : "$posts"},
                 "comments" : {$sum : "$posts.comments.summary.total_count"},
-                "shares": {$sum : "$posts.shares.count"},
-                "likes": {$sum : "$posts.likes.summary.total_count"},
-                "reactions": {$sum : "$posts.likes.reactions.total_count"},
-                "total_engagement" : { $sum : ["$$comments", "$$shares", "$$likes", "$reactions"]}
+                "reactions": {$sum : "$posts.reactions.summary.total_count"},
+                "likes": {$sum : "$posts.likes.summary.total_count"}
             }
         }
-
-    ]).then(docs=>{
-        if (!docs) {
-            return res.status(400).send({message : 'Bad Request', status : false})
-        }
-        return res.status(200).send(docs)
-    }).catch(err=>{
-        console.log(err);
-        return res.status(500).send({ message : 'Something went wrong!', status : false})
-    })
+     */
+    // these lines of code is only needed when your data is copied from csv
+    
     
  }
  module.exports = {

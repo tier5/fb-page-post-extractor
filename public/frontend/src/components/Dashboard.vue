@@ -231,6 +231,7 @@
   }
 </script>
 
+<style scoped>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
   .body {
     font-family: 'Open Sans', sans-serif;
@@ -270,7 +271,4 @@
   ul > li {
     margin: 10px 0 10px 0;
   }
-
-<style scoped>
-
 </style>

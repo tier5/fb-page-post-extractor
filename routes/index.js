@@ -4,7 +4,7 @@ const { deleteUserFromHook,
         suspendUserFromHook, 
         unsuspendUserFromHook, 
         createUserFromHook}         = require('../controllers/hooksController');
-const {getPagePosts, getPageStats}  = require('../controllers/pageController');
+const {getPagePosts, getPageStatsOverall}  = require('../controllers/pageController');
 const {verifyToken}                 = require('../services/jwt');
 const {Users}                       = require('../models/index');
 const {Pages}   = require('../models/index');
@@ -22,7 +22,9 @@ router.post("/users/suspend",suspendUserFromHook);
 router.post("/users/unsuspend",unsuspendUserFromHook);
 
 router.post('/posts',isAuthenticated,getPagePosts);
-router.get('/posts', getPageStats)
+//router.get('/posts', getPageStats);
+router.get('/posts/stats',getPageStatsOverall)
+
 
 /**
  * Function to check authentication 
